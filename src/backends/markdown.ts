@@ -643,6 +643,7 @@ export class MarkdownStore implements Store {
         isPublicFollowupTask(task) &&
         (patch.title !== undefined ||
           patch.body !== undefined ||
+          patch.appendBody !== undefined ||
           patch.archiveBody ||
           (patch.addBodyLines?.length ?? 0) > 0 ||
           (patch.addLinks?.length ?? 0) > 0 ||
@@ -656,6 +657,17 @@ export class MarkdownStore implements Store {
       }
       const nextBody =
         patch.body !== undefined ? patch.body || undefined : task.body;
+      if (
+        patch.appendBody !== undefined &&
+        (patch.body !== undefined ||
+          patch.archiveBody ||
+          !patch.appendBody.trim())
+      ) {
+        throw new AxiError(
+          "Body append requires non-empty text and cannot accompany replacement or archival",
+          "VALIDATION_ERROR",
+        );
+      }
       const supersededBody =
         patch.archiveBody && patch.body !== undefined && task.body !== nextBody
           ? task.body
@@ -683,6 +695,12 @@ export class MarkdownStore implements Store {
       }
       if (patch.body !== undefined && task.body !== nextBody) {
         task.body = nextBody;
+        markChanged("body");
+      }
+      if (patch.appendBody !== undefined) {
+        task.body = task.body
+          ? `${task.body}\n\n${patch.appendBody}`
+          : patch.appendBody;
         markChanged("body");
       }
       for (const line of patch.addBodyLines ?? []) {

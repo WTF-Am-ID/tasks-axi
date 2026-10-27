@@ -109,6 +109,10 @@ tasks-axi update nm-release-validation --body "rewritten notes"
 tasks-axi update nm-release-validation --body-file notes.md --archive-body
 tasks-axi update nm-release-validation --title "clearer title"
 
+# append notes without extracting or rewriting the existing body
+tasks-axi update nm-release-validation --append-body "New evidence"
+tasks-axi update nm-release-validation --append-body-file evidence.md
+
 # read the full notes on demand (truncated by default)
 tasks-axi show homemux-h7 --full
 
@@ -124,8 +128,9 @@ Output is [TOON](https://toonformat.dev)-encoded and token-efficient.
 The long task body is truncated by default — the whole point is that `list` stays cheap; use `--full` only when you need the complete notes.
 `update --body` and `update --body-file` replace the body wholesale, so agents should inspect the current body first and write back the curated current state rather than appending a journal entry.
 `--archive-body` preserves the replaced body in `note-archive.md` using the same dated markdown archive block style as done pruning.
+`update --append-body` and `--append-body-file` append a paragraph under the store lock, preserving existing notes and concurrent appends without a caller-side read. Each invocation appends once, separated from existing notes by a blank line. Append cannot be combined with body replacement or `--archive-body`.
 Every write leads with a terse `ok:` line confirming the write result, including the resulting task state when the command changes one (e.g. `ok: start lavish-share -> In flight`, `ok: done grok-harness-g7 -> Done (pr <url>)`, `ok: render -> normalized 3`), followed by state-aware next-step hints that never suggest an action the command just performed.
-Mutations are idempotent and report what changed (`already: true` on a no-op), so re-running one is safe.
+State changes and body replacements are idempotent and report what changed (`already: true` on a no-op), so re-running one is safe.
 Running `done` again on an already Done task can still backfill a new `--pr`, `--report`, or `--note` without changing the original close date.
 `hold <id> --reason "<text>"` records an intentional pause without turning it into prose, and `unhold <id>` clears it.
 The reason must be single-line text without parentheses because parentheses are reserved for canonical markdown tags.
