@@ -14,9 +14,8 @@ import { takeFlag } from "./args.js";
 export const DEFAULT_TRUNCATE = 500;
 
 /**
- * Resolve a body from `--body <text>` or `--body-file <path>` (mutually
- * exclusive) and remove the flags from args. Returns undefined when neither
- * is present.
+ * Resolve body text from mutually exclusive inline or file flags and remove
+ * them from args. Returns undefined when neither is present.
  */
 export function takeBody(
   args: string[],
