@@ -79,6 +79,49 @@ describe("update --append-body", () => {
     }
   });
 
+  describe.each(["inline", "file", "store"] as const)("%s append", (input) => {
+    it.each([true, false])(
+      "rejects reserved metadata without changing persisted bytes, existing body: %s",
+      async (hasBody) => {
+        const source = hasBody
+          ? BACKLOG
+          : "## Queued\n- [ ] notes-q1 - task notes\n";
+        const b = makeBacklog(source);
+        try {
+          const note = "Investigated tasks-axi:public-followup parsing";
+          let operation: Promise<unknown>;
+          if (input === "store") {
+            operation = b.store.update("notes-q1", { appendBody: note });
+          } else if (input === "file") {
+            const path = join(b.dir, "note.md");
+            writeFileSync(path, note, "utf8");
+            operation = updateCommand(
+              ["notes-q1", "--append-body-file", path],
+              b.ctx,
+            );
+          } else {
+            operation = updateCommand(
+              ["notes-q1", "--append-body", note],
+              b.ctx,
+            );
+          }
+          await expect(operation).rejects.toMatchObject({
+            code: "VALIDATION_ERROR",
+          });
+          expect(b.read()).toBe(source);
+          expect(b.noteArchive()).toBe("");
+          const reader = new MarkdownStore({ path: b.path });
+          expect((await reader.get("notes-q1"))?.body).toBe(
+            hasBody ? ORIGINAL : undefined,
+          );
+          expect((await reader.list({})).total).toBe(hasBody ? 2 : 1);
+        } finally {
+          b.cleanup();
+        }
+      },
+    );
+  });
+
   it("preserves both concurrent appends from separate store instances", async () => {
     const b = makeBacklog(BACKLOG);
     try {

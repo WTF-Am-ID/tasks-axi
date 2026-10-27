@@ -489,7 +489,9 @@ export class MarkdownStore implements Store {
 
   private persist(loaded: LoadedBacklogDoc): void {
     this.assertUnchanged(loaded);
-    atomicWrite(this.path, renderBacklog(loaded.doc));
+    const candidate = renderBacklog(loaded.doc);
+    parseBacklog(candidate);
+    atomicWrite(this.path, candidate);
   }
 
   private removeCreatedTask(id: string): void {
