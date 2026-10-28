@@ -217,7 +217,7 @@ It gently formalizes the inline tags a backlog already uses as the canonical fie
 - `(kind: X)` - task kind, when not already implied by a leading `SHIP` / `SCOUT` / `DOCS-ONLY` / `PERSISTENT SECONDMATE` word
 - `(priority: 0-4)` - optional priority, also accepted through `add` / `update --priority`
 - `(hold: <reason>)`, `(hold-kind: captain|external|load|parked|future)`, `(hold-until: YYYY-MM-DD)` - structured dispatch holds written by `hold`
-- `(report: data/<id>/report.md)` - report links written by `--report`, independent of the title
+- `(report: data/<id>/report.md)` - report links written by `--report`, independent of the title and preserved by title updates. Paths already in the title stay in the prose without a duplicate tag.
 - PR urls, legacy `data/<id>/report.md` prose paths, and other `http(s)` urls - derived typed links
 
 `tasks-axi render` rewrites every id'd task into this canonical form; free-form lines are left untouched.

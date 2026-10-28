@@ -153,7 +153,7 @@ function trimUrl(url: string): string {
   return url.replace(/[).,;]+$/, "");
 }
 
-/** Derive typed links by scanning prose (links live in the prose, not as tags). */
+/** Derive typed links by scanning prose; report tags are handled by extractTags. */
 export function deriveLinks(text: string): TaskLink[] {
   const links: TaskLink[] = [];
   const seen = new Set<string>();
